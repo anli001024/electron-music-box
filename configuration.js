@@ -1,5 +1,5 @@
 'use strict'
-
+// 将配置存入json文件中
 var nconf = require('nconf').file({
     file: getUserHome() + '/sound-machine-config.json'
 })
@@ -13,6 +13,7 @@ function readSettings(settingKey) {
     nconf.load();
     return nconf.get(settingKey);
 }
+
 
 function getUserHome() {
     return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']

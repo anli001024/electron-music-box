@@ -10,6 +10,7 @@ var globalShortcut = require('global-shortcut');
 var configuration = require('./configuration');
 
 app.on('ready', function() {
+    // 如果不存在快捷键缓存，则设置为默认值
     if (!configuration.readSettings('shortcutKeys')) {
         configuration.saveSettings('shortcutKeys', ['ctrl', 'shift']);
     }
@@ -22,14 +23,24 @@ app.on('ready', function() {
     });
 
     mainWindow.loadUrl('file://' + __dirname + '/app/index.html');
+    
+    setGlobalShortcuts();
+});
 
-    globalShortcut.register('ctrl+shift+1', function () {
+function setGlobalShortcuts() {
+    globalShortcut.unregisterAll();
+    var shortcutKeysSetting = configuration.readSettings('shortcutKeys');
+
+    // 拼接快捷键字符串
+    var shortcutPrefix = shortcutKeysSetting.length === 0 ? '' : shortcutKeysSetting.join('+') + '+';
+
+    globalShortcut.register(shortcutPrefix + '1', function () {
         mainWindow.webContents.send('global-shortcut', 0);
     });
-    globalShortcut.register('ctrl+shift+2', function () {
+    globalShortcut.register(shortcutPrefix + '2', function () {
         mainWindow.webContents.send('global-shortcut', 1);
     });
-});
+}
 
 var ipc = require('ipc');
 
@@ -46,7 +57,7 @@ ipc.on('open-settings-window', function () {
 
     settingsWindow = new BrowserWindow({
         frame: false,
-        height: 200,
+        height: 230,
         resizable: false,
         width: 200
     });
@@ -62,4 +73,7 @@ ipc.on('close-settings-window', function () {
     if (settingsWindow) {
         settingsWindow.close();
     }
+});
+ipc.on('set-global-shortcuts', function () {
+    setGlobalShortcuts();
 });
